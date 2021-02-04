@@ -4,10 +4,15 @@ public class main {
 
           //  Account account = new Account("Petras","Petddasdas",900);
           //  AccountDAO.createAccount(account);
-            TransactionDAO.checkBalance(1);
+                AccountDAO.createTableAccount();
+        TransactionDAO.createTableTransaction();
+                Transactions transactions = new Transactions(1,2,100);
 
-           // AccountDAO.createTableAccount();
-           // TransactionDAO.createTableTransaction();
+                TransactionDAO.checkBalance(transactions.getFromAccount(),transactions.getAmount()); //Checking user balance
+                TransactionDAO.newTransaction(transactions);
+
+
+
 
     }
 }
