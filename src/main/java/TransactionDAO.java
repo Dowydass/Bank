@@ -1,3 +1,4 @@
+import com.mysql.cj.jdbc.result.ResultSetImpl;
 import com.mysql.cj.x.protobuf.MysqlxDatatypes;
 
 import java.sql.*;
@@ -48,39 +49,55 @@ public class TransactionDAO {
     }
 
 
-    public static void checkBalance(int id, double amount) {
+    public static void transaction(int fromAccount, int toAccount, double amount) {
 
 
-        String query = "SELECT balance FROM Accounts WHERE id = '" + id + "'";
+        String query = "SELECT balance FROM Accounts WHERE id = '" + fromAccount + "'";
 
 
         try {
             Connection connection = DriverManager.getConnection(URL, USER, PASS);
             PreparedStatement preparedStatement = connection.prepareStatement(query);
-            ResultSet resultSet = preparedStatement.executeQuery();
+            ResultSet resultSet = preparedStatement.executeQuery(query);
 
             if (resultSet.next()) {
                 System.out.println(resultSet.getString(1));
                 double amount2 = resultSet.getDouble(1);
                 if (amount <= amount2) {
+                    Statement s = connection.createStatement();
+
+
+                    String query3 = "SELECT balance FROM Accounts WHERE id = '" + toAccount + "'";
+
+
+                        ResultSet resultSet1= preparedStatement.executeQuery(query3);
+
+                         double amount4 = resultSet1.getDouble(1);
+
+                        System.out.println("To user: " + amount4);
+                        double amount5 = amount4 + amount;
+                        String s2 = "UPDATE Accounts SET balance  = '" + amount5 + "' WHERE id = '" + toAccount + "'";
+
+
+
+
                     double amount3 = amount2 - amount;
 
-
-                    System.out.println(amount3);
-                  //String query1 = "UPDATE Accounts SET balance  = '" + amount3 + "' WHERE id = '" + id + "'";
-                   // String query1 = "SELECT balance FROM Accounts WHERE id = '" + 2 + "'";
+                    System.out.println("User balance: " + amount3);
 
 
-                    //UPDATE accounts SET balance = 900 WHERE id = 1
-                    //Palei viska ties cia pasidaviau
-                    //
-                    //
-                    //
-                    //
-                    // preparedStatement.executeQuery(query1);
+                    String s1 = "UPDATE Accounts SET balance  = '" + amount3 + "' WHERE id = '" + fromAccount + "'";
+                    s.addBatch(s1);
+                    s.addBatch(s2);
+                    s.executeBatch();
+
+                    Transactions transactions = new Transactions(fromAccount,toAccount,amount);
+                    newTransaction(transactions);
+
+
 
                 } else {
-                    System.out.println("Wrong amount");
+                    System.out.println("Wrong amount rollback ");
                 }
             } else {
                 System.err.println("There's are no records to display!");

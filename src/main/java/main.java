@@ -5,11 +5,11 @@ public class main {
           //  Account account = new Account("Petras","Petddasdas",900);
           //  AccountDAO.createAccount(account);
                 AccountDAO.createTableAccount();
-        TransactionDAO.createTableTransaction();
-                Transactions transactions = new Transactions(1,2,100);
+                TransactionDAO.createTableTransaction();
 
-                TransactionDAO.checkBalance(transactions.getFromAccount(),transactions.getAmount()); //Checking user balance
-                TransactionDAO.newTransaction(transactions);
+
+                TransactionDAO.transaction(1,2,100); //Checking user balance
+
 
 
 
