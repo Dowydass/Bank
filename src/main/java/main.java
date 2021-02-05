@@ -1,3 +1,5 @@
+
+
 public class main {
     public static void main(String[] args){
 
@@ -8,11 +10,7 @@ public class main {
                 TransactionDAO.createTableTransaction();
 
 
-                TransactionDAO.transaction(1,2,100); //Checking user balance
-
-
-
-
+                TransactionDAO.transaction(1,8,100); //Checking user balance
 
     }
 }

@@ -22,7 +22,6 @@ public class TransactionDAO {
             preparedStatement.executeUpdate(query);
             System.out.println("Table Transaction successfully created.......");
 
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -49,11 +48,10 @@ public class TransactionDAO {
     }
 
 
+
     public static void transaction(int fromAccount, int toAccount, double amount) {
 
-
         String query = "SELECT balance FROM Accounts WHERE id = '" + fromAccount + "'";
-
 
         try {
             Connection connection = DriverManager.getConnection(URL, USER, PASS);
@@ -63,41 +61,40 @@ public class TransactionDAO {
             if (resultSet.next()) {
                 System.out.println(resultSet.getString(1));
                 double amount2 = resultSet.getDouble(1);
-                if (amount <= amount2) {
+                if (amount <= amount2) {            //Checks if amount in user account are bigger or equals then amount2
+
                     Statement s = connection.createStatement();
 
 
                     String query3 = "SELECT balance FROM Accounts WHERE id = '" + toAccount + "'";
 
 
-                        ResultSet resultSet1= preparedStatement.executeQuery(query3);
+                    ResultSet resultSet1 = preparedStatement.executeQuery(query3);
+                    if (resultSet1.next()) {
+                        double amount4 = resultSet1.getDouble(1);
 
-                         double amount4 = resultSet1.getDouble(1);
+
 
                         System.out.println("To user: " + amount4);
                         double amount5 = amount4 + amount;
                         String s2 = "UPDATE Accounts SET balance  = '" + amount5 + "' WHERE id = '" + toAccount + "'";
 
+                        double amount3 = amount2 - amount;
 
+                        System.out.println("User balance: " + amount3);
 
-
-                    double amount3 = amount2 - amount;
-
-                    System.out.println("User balance: " + amount3);
-
-
-                    String s1 = "UPDATE Accounts SET balance  = '" + amount3 + "' WHERE id = '" + fromAccount + "'";
-                    s.addBatch(s1);
-                    s.addBatch(s2);
-                    s.executeBatch();
-
-                    Transactions transactions = new Transactions(fromAccount,toAccount,amount);
+                        String s1 = "UPDATE Accounts SET balance  = '" + amount3 + "' WHERE id = '" + fromAccount + "'";
+                        s.addBatch(s1);
+                        s.addBatch(s2);
+                        s.executeBatch();
+                    }
+                    Transactions transactions = new Transactions(fromAccount, toAccount, amount);
                     newTransaction(transactions);
 
 
-
                 } else {
-                    System.out.println("Wrong amount rollback ");
+                    System.out.println("Wrong amount - we going back boys");
+                    System.err.println("rollback");
                 }
             } else {
                 System.err.println("There's are no records to display!");
@@ -106,7 +103,6 @@ public class TransactionDAO {
         } catch (SQLException e) {
             System.out.println("error occurred more information: " + e.getMessage());
             e.printStackTrace();
-
         }
     }
 }
