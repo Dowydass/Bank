@@ -1,6 +1,7 @@
 import com.mysql.cj.jdbc.result.ResultSetImpl;
 import com.mysql.cj.x.protobuf.MysqlxDatatypes;
 
+import java.awt.*;
 import java.sql.*;
 
 public class TransactionDAO {
@@ -48,7 +49,6 @@ public class TransactionDAO {
     }
 
 
-
     public static void transaction(int fromAccount, int toAccount, double amount) {
 
         String query = "SELECT balance FROM Accounts WHERE id = '" + fromAccount + "'";
@@ -58,8 +58,17 @@ public class TransactionDAO {
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             ResultSet resultSet = preparedStatement.executeQuery(query);
 
+           if(fromAccount == toAccount){
+
+               System.out.println(" ");
+               System.out.println("Trying transfer amount to yourself");
+               System.out.println("ABORTING");
+
+               return;
+           }
             if (resultSet.next()) {
-                System.out.println(resultSet.getString(1));
+                System.out.println(" ");
+                System.out.println("User id: " + fromAccount + " Balance is: " + resultSet.getString(1));
                 double amount2 = resultSet.getDouble(1);
                 if (amount <= amount2) {            //Checks if amount in user account are bigger or equals then amount2
 
@@ -68,30 +77,47 @@ public class TransactionDAO {
 
                     String query3 = "SELECT balance FROM Accounts WHERE id = '" + toAccount + "'";
 
+                    String query4 = "SELECT id FROM Accounts WHERE id = '" + toAccount + "'";
 
-                    ResultSet resultSet1 = preparedStatement.executeQuery(query3);
-                    if (resultSet1.next()) {
-                        double amount4 = resultSet1.getDouble(1);
+                    ResultSet resultSet2 = preparedStatement.executeQuery(query4);
+
+                    if (resultSet2.next()) {
+
+                        int id = 0;
+                        id = resultSet2.getInt(1);
 
 
+                        if (id == toAccount) {
+                            System.out.println("Account status: EXISTS");
 
-                        System.out.println("To user: " + amount4);
-                        double amount5 = amount4 + amount;
-                        String s2 = "UPDATE Accounts SET balance  = '" + amount5 + "' WHERE id = '" + toAccount + "'";
+                            ResultSet resultSet1 = preparedStatement.executeQuery(query3);
 
-                        double amount3 = amount2 - amount;
+                            if (resultSet1.next()) {
 
-                        System.out.println("User balance: " + amount3);
+                                double amount4 = resultSet1.getDouble(1);
+                                double amount5 = amount4 + amount;
+                                double amount3 = amount2 - amount;
 
-                        String s1 = "UPDATE Accounts SET balance  = '" + amount3 + "' WHERE id = '" + fromAccount + "'";
-                        s.addBatch(s1);
-                        s.addBatch(s2);
-                        s.executeBatch();
+                                String s2 = "UPDATE Accounts SET balance  = '" + amount5 + "' WHERE id = '" + toAccount + "'";
+
+
+                                System.out.println(" ");
+                                System.out.println("Sending amount: " + amount + " to id: " + toAccount);
+                                System.out.println("New user: " + fromAccount + " balance: " + amount3);
+
+                                String s1 = "UPDATE Accounts SET balance  = '" + amount3 + "' WHERE id = '" + fromAccount + "'";
+                                s.addBatch(s1);
+                                s.addBatch(s2);
+                                s.executeBatch();
+
+
+                            }
+                            Transactions transactions = new Transactions(fromAccount, toAccount, amount);
+                            newTransaction(transactions);
+                        } else {
+                            System.out.println("Account doesn't exists rollback boys");
+                        }
                     }
-                    Transactions transactions = new Transactions(fromAccount, toAccount, amount);
-                    newTransaction(transactions);
-
-
                 } else {
                     System.out.println("Wrong amount - we going back boys");
                     System.err.println("rollback");
@@ -105,5 +131,7 @@ public class TransactionDAO {
             e.printStackTrace();
         }
     }
-}
+
+    }
+
 
