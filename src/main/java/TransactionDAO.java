@@ -51,12 +51,12 @@ public class TransactionDAO {
 
     public static void transaction(int fromAccount, int toAccount, double amount) {
 
-        String query = "SELECT balance FROM Accounts WHERE id = '" + fromAccount + "'";
+        String checkBalanceFromAccount = "SELECT balance FROM Accounts WHERE id = '" + fromAccount + "'";
 
         try {
             Connection connection = DriverManager.getConnection(URL, USER, PASS);
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
-            ResultSet resultSet = preparedStatement.executeQuery(query);
+            PreparedStatement preparedStatement = connection.prepareStatement(checkBalanceFromAccount);
+            ResultSet resultSet = preparedStatement.executeQuery();
 
            if(fromAccount == toAccount){
 
@@ -72,40 +72,37 @@ public class TransactionDAO {
                 double amount2 = resultSet.getDouble(1);
                 if (amount <= amount2) {            //Checks if amount in user account are bigger or equals then amount2
 
-                    Statement s = connection.createStatement();
 
 
-                    String query3 = "SELECT balance FROM Accounts WHERE id = '" + toAccount + "'";
-
+                    String selectBalanceToAccount = "SELECT balance FROM Accounts WHERE id = '" + toAccount + "'";
+                    preparedStatement.executeQuery();
                     String query4 = "SELECT id FROM Accounts WHERE id = '" + toAccount + "'";
-
                     ResultSet resultSet2 = preparedStatement.executeQuery(query4);
 
                     if (resultSet2.next()) {
 
-                        int id = 0;
-                        id = resultSet2.getInt(1);
+                        int checkIfExists = 0;
+                        checkIfExists = resultSet2.getInt(1);
 
-
-                        if (id == toAccount) {
+                        if (checkIfExists == toAccount) {
                             System.out.println("Account status: EXISTS");
 
-                            ResultSet resultSet1 = preparedStatement.executeQuery(query3);
+                            ResultSet checkBalanceToAccount = preparedStatement.executeQuery(selectBalanceToAccount);
 
-                            if (resultSet1.next()) {
+                            if (checkBalanceToAccount.next()) {
 
-                                double amount4 = resultSet1.getDouble(1);
-                                double amount5 = amount4 + amount;
-                                double amount3 = amount2 - amount;
-
-                                String s2 = "UPDATE Accounts SET balance  = '" + amount5 + "' WHERE id = '" + toAccount + "'";
+                                double balanceToAccountDouble = checkBalanceToAccount.getDouble(1);
+                                double amountUpdatedToAccount = amount2 - amount;
+                                double amountUpdatedFromAccount = balanceToAccountDouble + amount;
+                                Statement s = connection.createStatement();
+                                String s2 = "UPDATE Accounts SET balance  = '" + amountUpdatedToAccount + "' WHERE id = '" + toAccount + "'";
 
 
                                 System.out.println(" ");
                                 System.out.println("Sending amount: " + amount + " to id: " + toAccount);
-                                System.out.println("New user: " + fromAccount + " balance: " + amount3);
+                                System.out.println("New user: " + fromAccount + " balance: " + amountUpdatedFromAccount);
 
-                                String s1 = "UPDATE Accounts SET balance  = '" + amount3 + "' WHERE id = '" + fromAccount + "'";
+                                String s1 = "UPDATE Accounts SET balance  = '" + amountUpdatedFromAccount + "' WHERE id = '" + fromAccount + "'";
                                 s.addBatch(s1);
                                 s.addBatch(s2);
                                 s.executeBatch();

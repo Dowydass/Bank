@@ -12,7 +12,7 @@ public class main {
                 AccountDAO.createTableAccount();
                 TransactionDAO.createTableTransaction();
 
-                TransactionDAO.transaction(1,2,100); //Checking user balance
+                TransactionDAO.transaction(1,2,300); //Checking user balance
     }
     }
 
